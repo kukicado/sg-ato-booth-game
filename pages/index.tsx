@@ -1,115 +1,151 @@
-import Image from "next/image";
-import localFont from "next/font/local";
-
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
+import { useState, useEffect } from 'react';
+import ReactConfetti from 'react-confetti';
+import PrizeList from '../components/PrizeList';
 
 export default function Home() {
-  return (
-    <div
-      className={`${geistSans.variable} ${geistMono.variable} grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]`}
-    >
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              pages/index.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [code, setCode] = useState('')
+  const [message, setMessage] = useState('')
+  const [showConfetti, setShowConfetti] = useState(false)
+  const [showModal, setShowModal] = useState(true)
+  const [email, setEmail] = useState('')
+  const [showPrizes, setShowPrizes] = useState(false)
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const prizes = [
+    { id: 1, name: "Prize 1", description: "Description of Prize 1" },
+    { id: 2, name: "Prize 2", description: "Description of Prize 2" },
+    { id: 3, name: "Prize 3", description: "Description of Prize 3" },
+  ];
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const response = await fetch('/api/check-code', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ code }),
+    });
+    const data = await response.json();
+    
+    if (data.correct) {
+      setMessage('Congratulations! You won a prize!')
+      setShowConfetti(true)
+      setShowPrizes(true)
+    } else {
+      setMessage('Access denied. Try again!')
+    }
+    setCode('')
+  }
+
+  useEffect(() => {
+    if (showConfetti) {
+      const timer = setTimeout(() => setShowConfetti(false), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showConfetti]);
+
+  const handleEmailSubmit = (submittedEmail: string) => {
+    setEmail(submittedEmail)
+    setShowModal(false)
+  }
+
+  const handleNumberClick = (number: string) => {
+    if (code.length < 4) {
+      setCode(prevCode => prevCode + number)
+    }
+  }
+
+  const handleClear = () => {
+    setCode('')
+  }
+
+  const handleSelectPrize = (prizeId: number) => {
+    // Handle prize selection logic here
+    console.log(`Selected prize with id: ${prizeId}`);
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-800 text-white flex flex-col items-center justify-center">
+      {showConfetti && <ReactConfetti />}
+      {showModal ? (
+        <EmailModal onSubmit={handleEmailSubmit} />
+      ) : (
+        <div className="bg-gray-700 p-8 rounded-lg shadow-lg">
+          <h1 className="text-4xl font-bold mb-8 text-center">Cody's Vault</h1>
+          <div className="mb-4 h-12 bg-gray-900 rounded flex items-center justify-center">
+            <span className="text-2xl">{code.padEnd(4, '*')}</span>
+          </div>
+          <div className="grid grid-cols-3 gap-4 mb-4">
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((number) => (
+              <button
+                key={number}
+                onClick={() => handleNumberClick(number.toString())}
+                className="bg-gray-600 hover:bg-gray-500 text-white font-bold py-4 px-6 rounded"
+              >
+                {number}
+              </button>
+            ))}
+            <button
+              onClick={handleClear}
+              className="bg-red-500 hover:bg-red-600 text-white font-bold py-4 px-6 rounded"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <button
+              onClick={() => handleNumberClick('0')}
+              className="bg-gray-600 hover:bg-gray-500 text-white font-bold py-4 px-6 rounded"
+            >
+              0
+            </button>
+            <button
+              onClick={handleSubmit}
+              className="bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-6 rounded"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </button>
+          </div>
+          {message && <p className="mt-4 text-xl">{message}</p>}
+          {showPrizes && <PrizeList prizes={prizes} onSelectPrize={handleSelectPrize} />}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      )}
     </div>
-  );
+  )
+}
+const EmailModal = ({ onSubmit }: { onSubmit: (email: string) => void }) => {
+  const [inputEmail, setInputEmail] = useState('')
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (inputEmail.includes('@') && inputEmail.includes('.')) {
+      onSubmit(inputEmail)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+      <div className="bg-gray-700 p-8 rounded-lg shadow-lg">
+        <h2 className="text-2xl font-bold mb-4">Enter your email to play</h2>
+        <form onSubmit={handleSubmit}>
+          <input
+            type="email"
+            value={inputEmail}
+            onChange={(e) => setInputEmail(e.target.value)}
+            className="w-full p-2 mb-4 text-black rounded"
+            placeholder="your@email.com"
+            required
+          />
+          <button
+            type="submit"
+            className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
+          >
+            Start Game
+          </button>
+        </form>
+      </div>
+    </div>
+  )
 }
