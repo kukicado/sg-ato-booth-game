@@ -73,7 +73,7 @@ export default function Home() {
         <EmailModal onSubmit={handleEmailSubmit} />
       ) : (
         <div className="bg-gray-700 p-8 rounded-lg shadow-lg">
-          <h1 className="text-4xl font-bold mb-8 text-center">Cody's Vault</h1>
+          <h1 className="text-4xl font-bold mb-8 text-center">Cody&apos;s Vault</h1>
           <div className="mb-4 h-12 bg-gray-900 rounded flex items-center justify-center">
             <span className="text-2xl">{code.padEnd(4, '*')}</span>
           </div>
