@@ -10,6 +10,8 @@ export default function Home() {
   const [email, setEmail] = useState('')
   const [showPrizes, setShowPrizes] = useState(false)
 
+  console.log(email);
+
   const prizes = [
     { id: 1, name: "Prize 1", description: "Description of Prize 1" },
     { id: 2, name: "Prize 2", description: "Description of Prize 2" },
