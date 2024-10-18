@@ -1,43 +1,54 @@
 import { useState, useEffect } from 'react';
 import ReactConfetti from 'react-confetti';
-import PrizeList from '../components/PrizeList';
 
 export default function Home() {
-  const [code, setCode] = useState('')
+  const [guess, setGuess] = useState('')
   const [message, setMessage] = useState('')
   const [showConfetti, setShowConfetti] = useState(false)
-  const [showModal, setShowModal] = useState(true)
-  const [email, setEmail] = useState('')
-  const [showPrizes, setShowPrizes] = useState(false)
-
-  console.log(email);
-
-  const prizes = [
-    { id: 1, name: "Prize 1", description: "Description of Prize 1" },
-    { id: 2, name: "Prize 2", description: "Description of Prize 2" },
-    { id: 3, name: "Prize 3", description: "Description of Prize 3" },
-  ];
+  const [guessesLeft, setGuessesLeft] = useState(6)
+  const [previousGuesses, setPreviousGuesses] = useState<string[]>(Array(6).fill(''))
+  const [previousFeedback, setPreviousFeedback] = useState<string[][]>(Array(6).fill([]));
+  const [gameWon, setGameWon] = useState(false) 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (guess.length !== 5) {
+      setMessage('Please enter a 5-digit code.')
+      return
+    }
+  
     const response = await fetch('/api/check-code', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ code }),
+      body: JSON.stringify({ code: guess }),
     });
     const data = await response.json();
-    
+  
+    const newGuesses = [...previousGuesses];
+    newGuesses[6 - guessesLeft] = guess;
+    setPreviousGuesses(newGuesses);
+  
+    const newFeedback = [...previousFeedback];
+    newFeedback[6 - guessesLeft] = data.feedback;
+    setPreviousFeedback(newFeedback);
+  
+    setGuessesLeft(guessesLeft - 1)
+  
     if (data.correct) {
-      setMessage('Congratulations! You won a prize!')
+      setMessage('Congratulations!')
       setShowConfetti(true)
-      setShowPrizes(true)
+      setGameWon(true)
+    } else if (guessesLeft === 1) {
+      setMessage(`Game over. Try again!`)
     } else {
-      setMessage('Access denied. Try again!')
+      setMessage(`${guessesLeft - 1} guesses left.`)
     }
-    setCode('')
+    setGuess('') // Clear the current guess
   }
+  
+  
 
   useEffect(() => {
     if (showConfetti) {
@@ -46,77 +57,106 @@ export default function Home() {
     }
   }, [showConfetti]);
 
-  const handleEmailSubmit = (submittedEmail: string) => {
-    setEmail(submittedEmail)
-    setShowModal(false)
-  }
-
-  const handleNumberClick = (number: string) => {
-    if (code.length < 4) {
-      setCode(prevCode => prevCode + number)
+  const handleKeyPress = (key: string) => {
+    if (guess.length < 5) {
+      setGuess(prevGuess => prevGuess + key)
     }
   }
 
-  const handleClear = () => {
-    setCode('')
+  const handleBackspace = () => {
+    setGuess(prevGuess => prevGuess.slice(0, -1))
   }
-
-  const handleSelectPrize = (prizeId: number) => {
-    // Handle prize selection logic here
-    console.log(`Selected prize with id: ${prizeId}`);
-  }
-
   return (
-    <div className="min-h-screen bg-gray-800 text-white flex flex-col items-center justify-center">
-      {showConfetti && <ReactConfetti />}
-      {showModal ? (
-        <EmailModal onSubmit={handleEmailSubmit} />
-      ) : (
-        <div className="bg-gray-700 p-8 rounded-lg shadow-lg">
-          <h1 className="text-4xl font-bold mb-8 text-center">Cody&apos;s Vault</h1>
-          <div className="mb-4 h-12 bg-gray-900 rounded flex items-center justify-center">
-            <span className="text-2xl">{code.padEnd(4, '*')}</span>
+    <div className="min-h-screen bg-gray-100 text-gray-900 flex flex-col items-center justify-center relative overflow-hidden">
+      <div className="absolute left-0 top-0 w-1/2 h-full">
+        <img src="/left-context-tiles.svg" alt="Left background" className="w-full h-full object-cover" />
+      </div>
+      <div className="absolute right-0 top-0 w-1/2 h-full">
+        <img src="/right-context-tiles.svg" alt="Right background" className="w-full h-full object-cover" />
+      </div>
+      <div className="z-10">
+        {showConfetti && <ReactConfetti />}
+        <div className="bg-white p-8 rounded-lg shadow-lg">
+          <img src='/cody-logo.png' alt="Cody Logo" className="w-24 h-24 mb-10 mx-auto" />
+          <div className="mb-4">
+          {gameWon && (
+            <div className="text-center text-4xl mb-4">
+              🎉🏆
+            </div>
+          )}
+          {gameWon ? (
+              // Show only the winning guess when the game is won
+              <div className="flex mb-2 justify-center">
+                {previousGuesses[previousGuesses.findIndex(guess => guess !== '')].split('').map((digit, digitIndex) => (
+                  <div
+                    key={digitIndex}
+                    className="w-12 h-12 border-2 flex items-center justify-center text-2xl font-bold mr-2 bg-green-500 text-white"
+                  >
+                    {digit}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              [...Array(6)].map((_, index) => (
+              <div key={index} className="flex mb-2">
+                {(index === 6 - guessesLeft ? guess : previousGuesses[index] || '').padEnd(5).split('').map((digit, digitIndex) => (
+                  <div
+                    key={digitIndex}
+                    className={`w-12 h-12 border-2 flex items-center justify-center text-2xl font-bold mr-2 ${
+                      index === 6 - guessesLeft
+                        ? 'bg-purple-100 border-purple-600' // Highlight current guess
+                        : previousFeedback[index] && previousFeedback[index][digitIndex] === 'correct'
+                        ? 'bg-green-500 text-white'
+                        : previousFeedback[index] && previousFeedback[index][digitIndex] === 'present'
+                        ? 'bg-yellow-500 text-white'
+                        : previousFeedback[index] && previousFeedback[index][digitIndex] === 'absent'
+                        ? 'bg-gray-300'
+                        : 'bg-white'
+                    }`}
+                  >
+                    {digit !== ' ' ? digit : ''}
+                  </div>
+                ))}
+              </div>
+            ))
+          )}
           </div>
-          <div className="grid grid-cols-3 gap-4 mb-4">
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((number) => (
+          {guessesLeft > 0 && !gameWon && (
+          <div className="grid grid-cols-3 gap-2 mb-4">
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((number) => (
               <button
                 key={number}
-                onClick={() => handleNumberClick(number.toString())}
-                className="bg-gray-600 hover:bg-gray-500 text-white font-bold py-4 px-6 rounded"
+                onClick={() => handleKeyPress(number.toString())}
+                className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded"
               >
                 {number}
               </button>
             ))}
             <button
-              onClick={handleClear}
-              className="bg-red-500 hover:bg-red-600 text-white font-bold py-4 px-6 rounded"
+              onClick={handleBackspace}
+              className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-            <button
-              onClick={() => handleNumberClick('0')}
-              className="bg-gray-600 hover:bg-gray-500 text-white font-bold py-4 px-6 rounded"
-            >
-              0
+              ⌫
             </button>
             <button
               onClick={handleSubmit}
-              className="bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-6 rounded"
+              className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
+              Enter
             </button>
           </div>
-          {message && <p className="mt-4 text-xl">{message}</p>}
-          {showPrizes && <PrizeList prizes={prizes} onSelectPrize={handleSelectPrize} />}
+        )}
+          {message && <p className="mt-4 text-xl text-center">{message}</p>}
         </div>
-      )}
+      </div>
     </div>
   )
 }
+
+// ... (EmailModal component remains unchanged)
+
+
+
 const EmailModal = ({ onSubmit }: { onSubmit: (email: string) => void }) => {
   const [inputEmail, setInputEmail] = useState('')
 
