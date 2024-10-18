@@ -19,6 +19,10 @@ export default function Home() {
     setWinningCode(generateWinningCode())
   }, [])
 
+  const handlePlayAgain = () => {
+    window.location.reload();
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     console.log(winningCode);
@@ -48,7 +52,7 @@ export default function Home() {
       setShowConfetti(true)
       setGameWon(true)
     } else if (guessesLeft === 1) {
-      setMessage(`Game over. The correct code was ${winningCode}. Try again!`)
+      setMessage(`The correct code was ${winningCode}.`)
     } else {
       setMessage(`${guessesLeft - 1} guesses left.`)
     }
@@ -154,6 +158,15 @@ export default function Home() {
           </div>
         )}
           {message && <p className="mt-4 text-xl text-center">{message}</p>}
+          {/* Add the Play Again button */}
+        {(gameWon || guessesLeft === 0) && (
+          <button
+            onClick={handlePlayAgain}
+            className="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded w-full"
+          >
+            Play Again
+          </button>
+        )}
         </div>
       </div>
     </div>
