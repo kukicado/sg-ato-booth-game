@@ -5,47 +5,54 @@ export default function Home() {
   const [guess, setGuess] = useState('')
   const [message, setMessage] = useState('')
   const [showConfetti, setShowConfetti] = useState(false)
-  const [guessesLeft, setGuessesLeft] = useState(6)
-  const [previousGuesses, setPreviousGuesses] = useState<string[]>(Array(6).fill(''))
-  const [previousFeedback, setPreviousFeedback] = useState<string[][]>(Array(6).fill([]));
+  const [guessesLeft, setGuessesLeft] = useState(4)
+  const [previousGuesses, setPreviousGuesses] = useState<string[]>(Array(4).fill(''))
+  const [previousFeedback, setPreviousFeedback] = useState<string[][]>(Array(4).fill([]));
   const [gameWon, setGameWon] = useState(false) 
+  const [winningCode, setWinningCode] = useState('')
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const generateWinningCode = () => {
+    return Array(5).fill(0).map(() => Math.floor(Math.random() * 10)).join('')
+  }
+
+  useEffect(() => {
+    setWinningCode(generateWinningCode())
+  }, [])
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    console.log(winningCode);
     if (guess.length !== 5) {
       setMessage('Please enter a 5-digit code.')
       return
     }
   
-    const response = await fetch('/api/check-code', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ code: guess }),
-    });
-    const data = await response.json();
+    const feedback = guess.split('').map((digit, index) => {
+      if (digit === winningCode[index]) return 'correct'
+      if (winningCode.includes(digit)) return 'present'
+      return 'absent'
+    })
   
-    const newGuesses = [...previousGuesses];
-    newGuesses[6 - guessesLeft] = guess;
-    setPreviousGuesses(newGuesses);
+    const newGuesses = [...previousGuesses]
+    newGuesses[4 - guessesLeft] = guess
+    setPreviousGuesses(newGuesses)
   
-    const newFeedback = [...previousFeedback];
-    newFeedback[6 - guessesLeft] = data.feedback;
-    setPreviousFeedback(newFeedback);
+    const newFeedback = [...previousFeedback]
+    newFeedback[4 - guessesLeft] = feedback
+    setPreviousFeedback(newFeedback)
   
     setGuessesLeft(guessesLeft - 1)
   
-    if (data.correct) {
+    if (guess === winningCode) {
       setMessage('Congratulations!')
       setShowConfetti(true)
       setGameWon(true)
     } else if (guessesLeft === 1) {
-      setMessage(`Game over. Try again!`)
+      setMessage(`Game over. The correct code was ${winningCode}. Try again!`)
     } else {
       setMessage(`${guessesLeft - 1} guesses left.`)
     }
-    setGuess('') // Clear the current guess
+    setGuess('')
   }
   
   
@@ -87,23 +94,23 @@ export default function Home() {
           {gameWon ? (
               // Show only the winning guess when the game is won
               <div className="flex mb-2 justify-center">
-                {previousGuesses[previousGuesses.findIndex(guess => guess !== '')].split('').map((digit, digitIndex) => (
-                  <div
-                    key={digitIndex}
-                    className="w-12 h-12 border-2 flex items-center justify-center text-2xl font-bold mr-2 bg-green-500 text-white"
-                  >
-                    {digit}
-                  </div>
-                ))}
-              </div>
+    {winningCode.split('').map((digit, digitIndex) => (
+      <div
+        key={digitIndex}
+        className="w-12 h-12 border-2 flex items-center justify-center text-2xl font-bold mr-2 bg-green-500 text-white"
+      >
+        {digit}
+      </div>
+    ))}
+  </div>
             ) : (
-              [...Array(6)].map((_, index) => (
+              [...Array(4)].map((_, index) => (
               <div key={index} className="flex mb-2">
-                {(index === 6 - guessesLeft ? guess : previousGuesses[index] || '').padEnd(5).split('').map((digit, digitIndex) => (
+                {(index === 4 - guessesLeft ? guess : previousGuesses[index] || '').padEnd(5).split('').map((digit, digitIndex) => (
                   <div
                     key={digitIndex}
                     className={`w-12 h-12 border-2 flex items-center justify-center text-2xl font-bold mr-2 ${
-                      index === 6 - guessesLeft
+                      index === 4 - guessesLeft
                         ? 'bg-purple-100 border-purple-600' // Highlight current guess
                         : previousFeedback[index] && previousFeedback[index][digitIndex] === 'correct'
                         ? 'bg-green-500 text-white'
