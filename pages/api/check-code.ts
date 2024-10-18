@@ -19,18 +19,18 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     for (let i = 0; i < codeArray.length; i++) {
       if (codeArray[i] === winningCodeArray[i]) {
         feedback[i] = 'correct';
-        winningCodeArray[i] = null;
-        codeArray[i] = null;
+        winningCodeArray[i] = '';
+        codeArray[i] = '';
       }
     }
 
     // Second pass: check for present digits
     for (let i = 0; i < codeArray.length; i++) {
-      if (codeArray[i] !== null) {
+      if (codeArray[i] !== '') {
         const index = winningCodeArray.indexOf(codeArray[i]);
         if (index !== -1) {
           feedback[i] = 'present';
-          winningCodeArray[index] = null;
+          winningCodeArray[index] = '';
         }
       }
     }
