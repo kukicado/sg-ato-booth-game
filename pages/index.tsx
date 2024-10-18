@@ -25,7 +25,6 @@ export default function Home() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log(winningCode);
     if (guess.length !== 5) {
       setMessage('Please enter a 5-digit code.')
       return
