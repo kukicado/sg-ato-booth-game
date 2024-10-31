@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import ReactConfetti from 'react-confetti';
+import { QRCodeSVG } from 'qrcode.react';
 
 export default function Home() {
   const [guess, setGuess] = useState('')
@@ -78,6 +79,28 @@ export default function Home() {
   const handleBackspace = () => {
     setGuess(prevGuess => prevGuess.slice(0, -1))
   }
+
+  const generateShareText = () => {
+    const emojiMap = {
+      'correct': '🟩',
+      'present': '🟨',
+      'absent': '⬜'
+    };
+    
+    const rows = previousFeedback.slice(0, 4 - guessesLeft);
+    const emojiGrid = rows.map(row => 
+      row.map(feedback => emojiMap[feedback as keyof typeof emojiMap]).join('')
+    ).join('\n');
+    
+    return `Cody AI Code Game\n${4 - guessesLeft}/4\n\n${emojiGrid}\n\nPlay at https://ato.cody.dev`;
+  }
+  
+  const handleShare = () => {
+    const shareText = generateShareText();
+    const tweetUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
+    window.open(tweetUrl, '_blank');
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900 flex flex-col items-center justify-center relative overflow-hidden">
       <div className="absolute left-0 top-0 w-1/2 h-full">
@@ -97,17 +120,28 @@ export default function Home() {
             </div>
           )}
           {gameWon ? (
-              // Show only the winning guess when the game is won
-              <div className="flex mb-2 justify-center">
-    {winningCode.split('').map((digit, digitIndex) => (
-      <div
-        key={digitIndex}
-        className="w-12 h-12 border-2 flex items-center justify-center text-2xl font-bold mr-2 bg-green-500 text-white"
-      >
-        {digit}
-      </div>
-    ))}
-  </div>
+              // Show only the played rows up to the winning guess
+  [...Array(4 - guessesLeft)].map((_, index) => (
+    <div key={index} className="flex mb-2 justify-center">
+      {previousGuesses[index].split('').map((digit, digitIndex) => (
+        <div
+          key={digitIndex}
+          className={`w-12 h-12 border-2 flex items-center justify-center text-2xl font-bold mr-2 ${
+            previousFeedback[index][digitIndex] === 'correct'
+              ? 'bg-green-500 text-white'
+              : previousFeedback[index][digitIndex] === 'present'
+              ? 'bg-yellow-500 text-white'
+              : previousFeedback[index][digitIndex] === 'absent'
+              ? 'bg-gray-300'
+              : 'bg-white'
+          }`}
+        >
+          {/* Only show digits for the winning row (last row) */}
+          {index === (4 - guessesLeft - 1) ? digit : ''}
+        </div>
+      ))}
+    </div>
+  ))
             ) : (
               [...Array(4)].map((_, index) => (
               <div key={index} className="flex mb-2">
@@ -160,15 +194,40 @@ export default function Home() {
         )}
           {message && <p className="mt-4 text-xl text-center">{message}</p>}
           {/* Add the Play Again button */}
-        {(gameWon || guessesLeft === 0) && (
-          <button
-            onClick={handlePlayAgain}
-            className="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded w-full"
-          >
-            Play Again
-          </button>
-        )}
+          {(gameWon || guessesLeft === 0) && (
+  <div className="flex gap-2">
+    <button
+      onClick={handlePlayAgain}
+      className="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded flex-1"
+    >
+      Play Again
+    </button>
+    {gameWon && (
+      <button
+        onClick={handleShare}
+        className="mt-4 bg-black hover:bg-[#1a8cd8] text-white font-bold py-2 px-4 rounded flex-1"
+      >
+        Share on X
+      </button>
+    )}
+  </div>
+)}
+
         </div>
+      </div>
+
+      {/* Add QR code at the bottom */}
+      {gameWon && (<div className="mt-8 flex flex-col items-center">
+            <p className="text-black mb-6">Get 1 Month of Cody Pro for free!</p>
+            <QRCodeSVG 
+              value="https://sourcegraph.com/cody?ref=devstarterpack"
+              size={120}
+              level="L"
+            />
+          </div>
+        )}
+      <div className="absolute bottom-4 text-center text-sm text-gray-600 z-10">
+        Made with <a href="https://sourcegraph.com/cody" target="_blank" rel="noopener noreferrer" className="text-purple-600 hover:text-purple-800 font-medium">Cody AI</a>
       </div>
     </div>
   )
