@@ -2,6 +2,32 @@ import { useState, useEffect } from 'react';
 import ReactConfetti from 'react-confetti';
 import { QRCodeSVG } from 'qrcode.react';
 
+const HowToPlayModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-lg max-w-md">
+        <h2 className="text-2xl font-bold mb-4">How to Play</h2>
+        <ul className="list-disc list-inside space-y-2 mb-4">
+          <li>Guess the 5-digit code in 4 tries or less</li>
+          <li>After each guess, you'll get feedback:</li>
+          <li className="ml-4">🟩 Green: Correct digit in correct position</li>
+          <li className="ml-4">🟨 Yellow: Correct digit in wrong position</li>
+          <li className="ml-4">⬜ Gray: Digit not in the code</li>
+          <li>Each digit is used only once</li>
+        </ul>
+        <button
+          onClick={onClose}
+          className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 w-full"
+        >
+          Got it!
+        </button>
+      </div>
+    </div>
+  );
+};
+
 export default function Home() {
   const [guess, setGuess] = useState('')
   const [message, setMessage] = useState('')
@@ -11,6 +37,7 @@ export default function Home() {
   const [previousFeedback, setPreviousFeedback] = useState<string[][]>(Array(4).fill([]));
   const [gameWon, setGameWon] = useState(false) 
   const [winningCode, setWinningCode] = useState('')
+  const [isHowToPlayOpen, setIsHowToPlayOpen] = useState(false);
 
   const generateWinningCode = () => {
     const digits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -103,6 +130,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900 flex flex-col items-center justify-center relative overflow-hidden">
+      {/* Add Modal component */}
+      <HowToPlayModal isOpen={isHowToPlayOpen} onClose={() => setIsHowToPlayOpen(false)} />
       <div className="absolute left-0 top-0 w-1/2 h-full">
         <img src="/left-context-tiles.svg" alt="Left background" className="w-full h-full object-cover" />
       </div>
@@ -112,7 +141,9 @@ export default function Home() {
       <div className="z-10">
         {showConfetti && <ReactConfetti />}
         <div className="bg-white p-8 rounded-lg shadow-lg">
-          <img src='/cody-logo.png' alt="Cody Logo" className="w-24 h-24 mb-10 mx-auto" />
+        <div className="flex flex-col items-center mb-10">
+          <img src='/cody-logo.png' alt="Cody Logo" className="w-24 h-24 mb-4" />
+          </div>
           <div className="mb-4">
           {gameWon && (
             <div className="text-center text-4xl mb-4">
@@ -192,6 +223,14 @@ export default function Home() {
             </button>
           </div>
         )}
+          {!gameWon && (
+          <button
+              onClick={() => setIsHowToPlayOpen(true)}
+              className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 mx-auto block"
+            >
+              How to Play
+            </button>
+          )}
           {message && <p className="mt-4 text-xl text-center">{message}</p>}
           {/* Add the Play Again button */}
           {(gameWon || guessesLeft === 0) && (
