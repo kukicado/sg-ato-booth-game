@@ -11,7 +11,7 @@ const HowToPlayModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
         <h2 className="text-2xl font-bold mb-4">How to Play</h2>
         <ul className="list-disc list-inside space-y-2 mb-4">
           <li>Guess the 5-digit code in 4 tries or less</li>
-          <li>After each guess, you'll get feedback:</li>
+          <li>After each guess, you&apos;ll get feedback:</li>
           <li className="ml-4">🟩 Green: Correct digit in correct position</li>
           <li className="ml-4">🟨 Yellow: Correct digit in wrong position</li>
           <li className="ml-4">⬜ Gray: Digit not in the code</li>
