@@ -256,16 +256,33 @@ export default function Home() {
       </div>
 
       {/* Add QR code at the bottom */}
-      {gameWon && (<div className="mt-8 flex flex-col items-center">
-            <p className="text-black mb-6">Get 1 Month of Cody Pro for free!</p>
-            <QRCodeSVG 
-              value="https://sourcegraph.com/cody?ref=devstarterpack"
-              size={120}
-              level="L"
-            />
+      {(gameWon || guessesLeft === 0) && (
+        <div className="mt-12 flex flex-col items-center p-8">
+            <p className="text-xl font-semibold text-gray-800 mb-8">Thanks for playing! The fun doesn't end here.</p>
+            <div className="flex gap-12">
+              <div className="flex flex-col items-center transform hover:scale-105 transition-transform duration-200">
+                <p className="text-base font-medium text-gray-700 mb-3">Happy Hour at Alexxa's</p>
+                <div className="p-3 bg-white rounded-lg shadow-md">
+                  <QRCodeSVG 
+                    value="https://lu.ma/f246byvx"
+                    size={120}
+                    level="L"
+                  />
+                </div>
+              </div>
+              <div className="flex flex-col items-center transform hover:scale-105 transition-transform duration-200">
+                <p className="text-base font-medium text-gray-700 mb-3">Virtual Code AI Summit</p>
+                <div className="p-3 bg-white rounded-lg shadow-md">
+                  <QRCodeSVG 
+                    value="https://sourcegraph.registration.goldcast.io/events/b650937d-ba9f-40ce-9429-35c3539a5bb1?utm_medium=reinventgame&utm_source=reinventgame"
+                    size={120}
+                    level="L"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
-        )}
-      <div className="absolute bottom-4 text-center text-sm text-gray-600 z-10">
+        )}      <div className="absolute bottom-4 text-center text-sm text-gray-600 z-10">
         Made with <a href="https://sourcegraph.com/cody" target="_blank" rel="noopener noreferrer" className="text-purple-600 hover:text-purple-800 font-medium">Cody AI</a>
       </div>
     </div>
