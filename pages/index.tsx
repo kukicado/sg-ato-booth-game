@@ -258,10 +258,10 @@ export default function Home() {
       {/* Add QR code at the bottom */}
       {(gameWon || guessesLeft === 0) && (
         <div className="mt-12 flex flex-col items-center p-8">
-            <p className="text-xl font-semibold text-gray-800 mb-8">Thanks for playing! The fun doesn't end here.</p>
+            <p className="text-xl font-semibold text-gray-800 mb-8">Thanks for playing! The fun doesn&apos;t end here.</p>
             <div className="flex gap-12">
               <div className="flex flex-col items-center transform hover:scale-105 transition-transform duration-200">
-                <p className="text-base font-medium text-gray-700 mb-3">Happy Hour at Alexxa's</p>
+                <p className="text-base font-medium text-gray-700 mb-3">Happy Hour at Alexxa&apos;s</p>
                 <div className="p-3 bg-white rounded-lg shadow-md">
                   <QRCodeSVG 
                     value="https://lu.ma/f246byvx"
