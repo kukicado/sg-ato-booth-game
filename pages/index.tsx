@@ -7,19 +7,18 @@ const HowToPlayModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-lg max-w-md">
+      <div className="bg-[#1B1B1B] p-6 rounded-lg max-w-md text-white">
         <h2 className="text-2xl font-bold mb-4">How to Play</h2>
         <ul className="list-disc list-inside space-y-2 mb-4">
-          <li>Guess the 5-digit code in 4 tries or less</li>
+          <li>Guess the 5-letter word in 4 tries or less</li>
           <li>After each guess, you&apos;ll get feedback:</li>
-          <li className="ml-4">🟩 Green: Correct digit in correct position</li>
-          <li className="ml-4">🟨 Yellow: Correct digit in wrong position</li>
-          <li className="ml-4">⬜ Gray: Digit not in the code</li>
-          <li>Each digit is used only once</li>
+          <li className="ml-4">🟩 Green: Correct letter in correct position</li>
+          <li className="ml-4">🟨 Yellow: Correct letter in wrong position</li>
+          <li className="ml-4">⬜ Gray: Letter not in the word</li>
         </ul>
         <button
           onClick={onClose}
-          className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 w-full"
+          className="bg-[#FF5543] text-white px-4 py-2 rounded hover:bg-[#E54434] w-full"
         >
           Got it!
         </button>
@@ -38,16 +37,29 @@ export default function Home() {
   const [gameWon, setGameWon] = useState(false) 
   const [winningCode, setWinningCode] = useState('')
   const [isHowToPlayOpen, setIsHowToPlayOpen] = useState(false);
+  const [currentRound, setCurrentRound] = useState<number>(0);
+  const [isBonus, setIsBonus] = useState(false);
+  const [wordLength, setWordLength] = useState(5);
 
-  const generateWinningCode = () => {
-    const digits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-    const shuffled = digits.sort(() => Math.random() - 0.5)
-    return shuffled.slice(0, 5).join('')
-  }
+  const fetchCurrentRound = async () => {
+    try {
+      const response = await fetch('/api/round');
+      const data = await response.json();
+      setCurrentRound(data.roundNumber);
+      setWinningCode(data.word);
+      setIsBonus(data.isBonus || false);
+      setWordLength(data.word.length);
+    } catch (error) {
+      console.error('Error fetching round:', error);
+    }
+  };
 
   useEffect(() => {
-    setWinningCode(generateWinningCode())
-  }, [])
+    fetchCurrentRound();
+    // Poll for round updates every 30 seconds
+    //const interval = setInterval(fetchCurrentRound, 10000);
+    //return () => clearInterval(interval);
+  }, []);
 
   const handlePlayAgain = () => {
     window.location.reload();
@@ -55,33 +67,35 @@ export default function Home() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (guess.length !== 5) {
-      setMessage('Please enter a 5-digit code.')
+    const upperGuess = guess.toUpperCase();
+    
+    if (guess.length !== wordLength) {
+      setMessage(`Please enter a ${wordLength}-letter word.`)
       return
     }
-  
-    const feedback = guess.split('').map((digit, index) => {
-      if (digit === winningCode[index]) return 'correct'
-      if (winningCode.includes(digit)) return 'present'
+
+    const feedback = upperGuess.split('').map((letter, index) => {
+      if (letter === winningCode[index]) return 'correct'
+      if (winningCode.includes(letter)) return 'present'
       return 'absent'
     })
-  
+
     const newGuesses = [...previousGuesses]
-    newGuesses[4 - guessesLeft] = guess
+    newGuesses[4 - guessesLeft] = upperGuess
     setPreviousGuesses(newGuesses)
-  
+
     const newFeedback = [...previousFeedback]
     newFeedback[4 - guessesLeft] = feedback
     setPreviousFeedback(newFeedback)
-  
+
     setGuessesLeft(guessesLeft - 1)
-  
-    if (guess === winningCode) {
+
+    if (upperGuess === winningCode) {
       setMessage('Congratulations!')
       setShowConfetti(true)
       setGameWon(true)
     } else if (guessesLeft === 1) {
-      setMessage(`The correct code was ${winningCode}.`)
+      setMessage(`The word was ${winningCode}.`)
     } else {
       setMessage(`${guessesLeft - 1} guesses left.`)
     }
@@ -98,8 +112,8 @@ export default function Home() {
   }, [showConfetti]);
 
   const handleKeyPress = (key: string) => {
-    if (guess.length < 5) {
-      setGuess(prevGuess => prevGuess + key)
+    if (guess.length < wordLength) {
+      setGuess(prevGuess => prevGuess + key.toUpperCase())
     }
   }
 
@@ -119,7 +133,7 @@ export default function Home() {
       row.map(feedback => emojiMap[feedback as keyof typeof emojiMap]).join('')
     ).join('\n');
     
-    return `Cody AI Code Game\n${4 - guessesLeft}/4\n\n${emojiGrid}\n\nPlay at https://ato.cody.dev`;
+    return `I won the Cody AI game in \n${4 - guessesLeft}/4\n\n${emojiGrid}\n\nYou can win too by learning about our Vision for Agents at  https://sourcegraph.com/agents`;
   }
   
   const handleShare = () => {
@@ -128,21 +142,31 @@ export default function Home() {
     window.open(tweetUrl, '_blank');
   }
 
+  // Replace the number pad with a keyboard
+  const keyboard = [
+    ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+    ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
+    ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-100 text-gray-900 flex flex-col items-center justify-center relative overflow-hidden">
+    <div className="min-h-screen bg-[#151515] text-white flex flex-col items-center justify-center relative overflow-hidden">
       {/* Add Modal component */}
       <HowToPlayModal isOpen={isHowToPlayOpen} onClose={() => setIsHowToPlayOpen(false)} />
-      <div className="absolute left-0 top-0 w-1/2 h-full">
-        <img src="/left-context-tiles.svg" alt="Left background" className="w-full h-full object-cover" />
+      
+      {/* Replace the two background divs with this single background div */}
+      <div className="absolute inset-0 z-0">
+        <img src="/bg.png" alt="Background" className="w-full h-full object-cover" />
       </div>
-      <div className="absolute right-0 top-0 w-1/2 h-full">
-        <img src="/right-context-tiles.svg" alt="Right background" className="w-full h-full object-cover" />
-      </div>
+
       <div className="z-10">
         {showConfetti && <ReactConfetti />}
-        <div className="bg-white p-8 rounded-lg shadow-lg">
-        <div className="flex flex-col items-center mb-10">
-          <img src='/cody-logo.png' alt="Cody Logo" className="w-24 h-24 mb-4" />
+        <div className="bg-[#1B1B1B] p-8 rounded-lg shadow-lg">
+          <div className="flex flex-col items-center mb-10">
+            <img src='/pictogram-dark.png' alt="Sourcegraph Logo" className="w-24 h-24 mb-4" />
+            <div className="text-xl font-bold text-[#FF5543] mb-4">
+              {isBonus ? 'Bonus Round!' : `Round ${currentRound} of 3`}
+            </div>
           </div>
           <div className="mb-4">
           {gameWon && (
@@ -157,7 +181,7 @@ export default function Home() {
       {previousGuesses[index].split('').map((digit, digitIndex) => (
         <div
           key={digitIndex}
-          className={`w-12 h-12 border-2 flex items-center justify-center text-2xl font-bold mr-2 ${
+          className={`w-10 h-12 border-2 flex items-center justify-center text-xl font-bold mr-1 ${
             previousFeedback[index][digitIndex] === 'correct'
               ? 'bg-green-500 text-white'
               : previousFeedback[index][digitIndex] === 'present'
@@ -175,76 +199,82 @@ export default function Home() {
   ))
             ) : (
               [...Array(4)].map((_, index) => (
-              <div key={index} className="flex mb-2">
-                {(index === 4 - guessesLeft ? guess : previousGuesses[index] || '').padEnd(5).split('').map((digit, digitIndex) => (
-                  <div
-                    key={digitIndex}
-                    className={`w-12 h-12 border-2 flex items-center justify-center text-2xl font-bold mr-2 ${
-                      index === 4 - guessesLeft
-                        ? 'bg-purple-100 border-purple-600' // Highlight current guess
-                        : previousFeedback[index] && previousFeedback[index][digitIndex] === 'correct'
-                        ? 'bg-green-500 text-white'
-                        : previousFeedback[index] && previousFeedback[index][digitIndex] === 'present'
-                        ? 'bg-yellow-500 text-white'
-                        : previousFeedback[index] && previousFeedback[index][digitIndex] === 'absent'
-                        ? 'bg-gray-300'
-                        : 'bg-white'
-                    }`}
-                  >
-                    {digit !== ' ' ? digit : ''}
-                  </div>
-                ))}
-              </div>
-            ))
-          )}
+                <div key={index} className="flex mb-2 justify-center">
+                  {(index === 4 - guessesLeft ? guess : previousGuesses[index] || '').padEnd(wordLength).split('').map((digit, digitIndex) => (
+                    <div
+                      key={digitIndex}
+                      className={`w-10 h-12 border-2 flex items-center justify-center text-xl font-bold mr-1 ${
+                        index === 4 - guessesLeft
+                          ? 'bg-[#2A2A2A] border-[#FF5543]' // Highlight current guess with vermillion border
+                          : previousFeedback[index] && previousFeedback[index][digitIndex] === 'correct'
+                          ? 'bg-green-500 text-white'
+                          : previousFeedback[index] && previousFeedback[index][digitIndex] === 'present'
+                          ? 'bg-yellow-500 text-white'
+                          : previousFeedback[index] && previousFeedback[index][digitIndex] === 'absent'
+                          ? 'bg-gray-300'
+                          : 'bg-[#2A2A2A]'
+                      }`}
+                    >
+                      {digit !== ' ' ? digit : ''}
+                    </div>
+                  ))}
+                </div>
+              ))
+            )}
           </div>
           {guessesLeft > 0 && !gameWon && (
-          <div className="grid grid-cols-3 gap-2 mb-4">
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((number) => (
-              <button
-                key={number}
-                onClick={() => handleKeyPress(number.toString())}
-                className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded"
-              >
-                {number}
-              </button>
-            ))}
-            <button
-              onClick={handleBackspace}
-              className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
-            >
-              ⌫
-            </button>
-            <button
-              onClick={handleSubmit}
-              className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
-            >
-              Enter
-            </button>
-          </div>
-        )}
+            <div className="mb-4">
+              {keyboard.map((row, rowIndex) => (
+                <div key={rowIndex} className="flex justify-center gap-1 mb-1">
+                  {row.map((letter) => (
+                    <button
+                      key={letter}
+                      onClick={() => handleKeyPress(letter)}
+                      className="bg-[#2A2A2A] hover:bg-[#3A3A3A] text-white font-bold py-2 px-3 rounded min-w-[2rem]"
+                    >
+                      {letter}
+                    </button>
+                  ))}
+                </div>
+              ))}
+              <div className="flex justify-center gap-2 mt-2">
+                <button
+                  onClick={handleBackspace}
+                  className="bg-[#2A2A2A] hover:bg-[#3A3A3A] text-white font-bold py-2 px-4 rounded"
+                >
+                  ⌫
+                </button>
+                <button
+                  onClick={handleSubmit}
+                  className="bg-[#FF5543] hover:bg-[#E54434] text-white font-bold py-2 px-4 rounded"
+                >
+                  Enter
+                </button>
+              </div>
+            </div>
+          )}
           {!gameWon && (
           <button
               onClick={() => setIsHowToPlayOpen(true)}
-              className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 mx-auto block"
+              className="bg-[#FF5543] text-white px-4 py-2 rounded hover:bg-[#E54434] mx-auto block"
             >
               How to Play
             </button>
           )}
-          {message && <p className="mt-4 text-xl text-center">{message}</p>}
+          {message && <p className="mt-4 text-xl text-center text-white">{message}</p>}
           {/* Add the Play Again button */}
           {(gameWon || guessesLeft === 0) && (
   <div className="flex gap-2">
     <button
       onClick={handlePlayAgain}
-      className="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded flex-1"
+      className="mt-4 bg-[#FF5543] hover:bg-[#E54434] text-white font-bold py-2 px-4 rounded flex-1"
     >
       Play Again
     </button>
     {gameWon && (
       <button
         onClick={handleShare}
-        className="mt-4 bg-black hover:bg-[#1a8cd8] text-white font-bold py-2 px-4 rounded flex-1"
+        className="mt-4 bg-[#2A2A2A] hover:bg-[#3A3A3A] text-white font-bold py-2 px-4 rounded flex-1"
       >
         Share on X
       </button>
@@ -254,26 +284,8 @@ export default function Home() {
 
         </div>
       </div>
-
-      {/* Add QR code at the bottom */}
-      {(gameWon || guessesLeft === 0) && (
-        <div className="mt-12 flex flex-col items-center p-8">
-            <p className="text-xl font-semibold text-gray-800 mb-8">Thanks for playing! The fun doesn&apos;t end here.</p>
-            <div className="flex gap-12">
-              <div className="flex flex-col items-center transform hover:scale-105 transition-transform duration-200">
-                <p className="text-base font-medium text-gray-700 mb-3">Virtual Code AI Summit</p>
-                <div className="p-3 bg-white rounded-lg shadow-md">
-                  <QRCodeSVG 
-                    value="https://sourcegraph.registration.goldcast.io/events/b650937d-ba9f-40ce-9429-35c3539a5bb1?utm_medium=reinventgame&utm_source=reinventgame"
-                    size={120}
-                    level="L"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        )}      <div className="absolute bottom-4 text-center text-sm text-gray-600 z-10">
-        Made with <a href="https://sourcegraph.com/cody" target="_blank" rel="noopener noreferrer" className="text-purple-600 hover:text-purple-800 font-medium">Cody AI</a>
+   <div className="absolute bottom-4 text-center text-sm text-gray-400 z-10">
+        Made with <a href="https://sourcegraph.com/cody" target="_blank" rel="noopener noreferrer" className="text-[#FF5543] hover:text-[#E54434] font-medium underline">Cody AI</a>
       </div>
     </div>
   )
