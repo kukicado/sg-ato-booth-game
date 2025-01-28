@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import ReactConfetti from 'react-confetti';
-import { QRCodeSVG } from 'qrcode.react';
 
 const HowToPlayModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   if (!isOpen) return null;
