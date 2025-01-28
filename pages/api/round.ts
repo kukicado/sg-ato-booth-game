@@ -1,9 +1,9 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 
 const ROUNDS = [
-  { word: 'CODER', roundNumber: 1 },
-  { word: 'BUILD', roundNumber: 2 },
-  { word: 'AGENT', roundNumber: 3 },
+  { word: 'AGENT', roundNumber: 1 },
+  { word: 'MERGE', roundNumber: 2 },
+  { word: 'SCALE', roundNumber: 3 },
   { word: 'VERMILLION', roundNumber: 4, isBonus: true }
 ];
 
