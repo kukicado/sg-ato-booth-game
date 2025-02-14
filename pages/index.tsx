@@ -19,7 +19,7 @@ const HowToPlayModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
         </ul>
         <button
           onClick={onClose}
-          className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 w-full"
+          className="bg-[#FF4F00] text-white px-4 py-2 rounded hover:bg-[#E64500] w-full"
         >
           Got it!
         </button>
@@ -130,7 +130,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900 flex flex-col items-center justify-center relative overflow-hidden">
-      {/* Replace the background images */}
+      {/* Add back the modal component */}
+      <HowToPlayModal isOpen={isHowToPlayOpen} onClose={() => setIsHowToPlayOpen(false)} />
+      
       <div className="absolute inset-0">
         <img src="/bg.png" alt="Background" className="w-full h-full object-cover" />
       </div>
@@ -258,7 +260,7 @@ export default function Home() {
           <p className="text-xl font-semibold text-gray-800 mb-8">Thanks for playing! Want to learn more?</p>
           <div className="flex gap-12">
             <div className="flex flex-col items-center transform hover:scale-105 transition-transform duration-200">
-              <p className="text-base font-medium text-gray-700 mb-3">Learn about Sourcegraph Agents</p>
+              <p className="text-base font-medium text-gray-700 mb-3 text-white">Learn about Sourcegraph Agents</p>
               <div className="p-3 bg-white rounded-lg shadow-md">
                 <QRCodeSVG 
                   value="https://sourcegraph.com/agents"
