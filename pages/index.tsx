@@ -130,19 +130,16 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900 flex flex-col items-center justify-center relative overflow-hidden">
-      {/* Add Modal component */}
-      <HowToPlayModal isOpen={isHowToPlayOpen} onClose={() => setIsHowToPlayOpen(false)} />
-      <div className="absolute left-0 top-0 w-1/2 h-full">
-        <img src="/left-context-tiles.svg" alt="Left background" className="w-full h-full object-cover" />
-      </div>
-      <div className="absolute right-0 top-0 w-1/2 h-full">
-        <img src="/right-context-tiles.svg" alt="Right background" className="w-full h-full object-cover" />
+      {/* Replace the background images */}
+      <div className="absolute inset-0">
+        <img src="/bg.png" alt="Background" className="w-full h-full object-cover" />
       </div>
       <div className="z-10">
         {showConfetti && <ReactConfetti />}
         <div className="bg-white p-8 rounded-lg shadow-lg">
-        <div className="flex flex-col items-center mb-10">
-          <img src='/cody-logo.png' alt="Cody Logo" className="w-24 h-24 mb-4" />
+          <div className="flex flex-col items-center mb-10">
+            {/* Update the logo image */}
+            <img src='/pictogram-dark.png' alt="Cody Logo" className="w-16 h-16 mb-4" />
           </div>
           <div className="mb-4">
           {gameWon && (
@@ -181,7 +178,7 @@ export default function Home() {
                     key={digitIndex}
                     className={`w-12 h-12 border-2 flex items-center justify-center text-2xl font-bold mr-2 ${
                       index === 4 - guessesLeft
-                        ? 'bg-purple-100 border-purple-600' // Highlight current guess
+                        ? 'bg-[#FF4F00]/10 border-[#FF4F00]'
                         : previousFeedback[index] && previousFeedback[index][digitIndex] === 'correct'
                         ? 'bg-green-500 text-white'
                         : previousFeedback[index] && previousFeedback[index][digitIndex] === 'present'
@@ -226,7 +223,7 @@ export default function Home() {
           {!gameWon && (
           <button
               onClick={() => setIsHowToPlayOpen(true)}
-              className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 mx-auto block"
+              className="bg-[#FF4F00] text-white px-4 py-2 rounded hover:bg-[#E64500] mx-auto block"
             >
               How to Play
             </button>
@@ -255,25 +252,28 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Add QR code at the bottom */}
+      {/* Update QR code section styling to work better with new background */}
       {(gameWon || guessesLeft === 0) && (
-        <div className="mt-12 flex flex-col items-center p-8">
-            <p className="text-xl font-semibold text-gray-800 mb-8">Thanks for playing! The fun doesn&apos;t end here.</p>
-            <div className="flex gap-12">
-              <div className="flex flex-col items-center transform hover:scale-105 transition-transform duration-200">
-                <p className="text-base font-medium text-gray-700 mb-3">Virtual Code AI Summit</p>
-                <div className="p-3 bg-white rounded-lg shadow-md">
-                  <QRCodeSVG 
-                    value="https://sourcegraph.registration.goldcast.io/events/b650937d-ba9f-40ce-9429-35c3539a5bb1?utm_medium=reinventgame&utm_source=reinventgame"
-                    size={120}
-                    level="L"
-                  />
-                </div>
+        <div className="mt-12 flex flex-col items-center p-8 bg-white/90 rounded-lg">
+          <p className="text-xl font-semibold text-gray-800 mb-8">Thanks for playing! Want to learn more?</p>
+          <div className="flex gap-12">
+            <div className="flex flex-col items-center transform hover:scale-105 transition-transform duration-200">
+              <p className="text-base font-medium text-gray-700 mb-3">Learn about Sourcegraph Agents</p>
+              <div className="p-3 bg-white rounded-lg shadow-md">
+                <QRCodeSVG 
+                  value="https://sourcegraph.com/agents"
+                  size={120}
+                  level="L"
+                />
               </div>
             </div>
           </div>
-        )}      <div className="absolute bottom-4 text-center text-sm text-gray-600 z-10">
-        Made with <a href="https://sourcegraph.com/cody" target="_blank" rel="noopener noreferrer" className="text-purple-600 hover:text-purple-800 font-medium">Cody AI</a>
+        </div>
+      )}
+      
+      {/* Update footer styling for better contrast with new background */}
+      <div className="absolute bottom-4 text-center text-sm text-white z-10">
+        Made with <a href="https://sourcegraph.com/cody" target="_blank" rel="noopener noreferrer" className="text-white hover:text-gray-200 font-medium">Cody AI</a>
       </div>
     </div>
   )
