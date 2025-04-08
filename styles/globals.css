@@ -5,6 +5,8 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --primary: #FF4F00;
+  --primary-hover: #E64500;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -23,6 +25,220 @@ body {
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+}
+
+/* HubSpot Form Styling */
+.hubspot-custom-form {
+  font-family: Arial, Helvetica, sans-serif;
+  padding: 1rem 0;
+  box-sizing: border-box;
+}
+
+.hubspot-custom-form .hs-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Fix consistent width issues */
+.hubspot-custom-form .hs-form-field {
+  width: 100% !important;
+}
+
+.hubspot-custom-form .hs-form fieldset {
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
+/* Fix for firstname/lastname field width */
+.hubspot-custom-form .form-columns-2 .hs-form-field {
+  width: 50% !important;
+  padding-right: 5px !important;
+  box-sizing: border-box !important;
+}
+
+.hubspot-custom-form .form-columns-2 .hs-form-field:last-child {
+  padding-right: 0 !important;
+  padding-left: 5px !important;
+}
+
+.hubspot-custom-form .hs-form .input {
+  margin-right: 0 !important;
+  width: 100% !important;
+}
+
+/* Force full width single-line inputs */
+.hubspot-custom-form .form-columns-1 .hs-input:not([type="checkbox"]):not([type="radio"]) {
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Fix checkbox styling to keep label on same line - aggressive approach */
+.hubspot-custom-form .legal-consent-container .hs-form-booleancheckbox-display {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: flex-start !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.hubspot-custom-form .legal-consent-container .hs-form-booleancheckbox-display input {
+  order: 1 !important;
+  margin: 4px 10px 0 0 !important;
+  width: auto !important;
+  flex: 0 0 auto !important;
+}
+
+.hubspot-custom-form .legal-consent-container .hs-form-booleancheckbox-display span {
+  order: 2 !important;
+  display: inline !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.hubspot-custom-form .legal-consent-container .hs-error-msgs {
+  order: 3 !important;
+  padding-left: 25px !important;
+}
+
+/* Target both standard checkbox and legal consent checkbox */
+.hubspot-custom-form .hs-fieldtype-booleancheckbox,
+.hubspot-custom-form .hs-dependent-field {
+  margin-bottom: 10px !important;
+}
+
+.hubspot-custom-form .hs-fieldtype-booleancheckbox span.hs-form-booleancheckbox-display {
+  display: flex !important;
+  align-items: flex-start !important;
+}
+
+/* Make sure paragraphs in checkbox labels align properly */
+.hubspot-custom-form .hs-form-booleancheckbox-display p {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* Prevent resizing on focus/hover */
+.hubspot-custom-form * {
+  box-sizing: border-box !important;
+}
+
+/* Additional fixes for legal consent container */
+.hubspot-custom-form .legal-consent-container {
+  margin-top: 10px !important;
+}
+
+.hubspot-custom-form .legal-consent-container .hs-richtext p {
+  margin-top: 0 !important;
+  margin-bottom: 10px !important;
+}
+
+/* Fix for specific issues with the Terms consent */
+.hubspot-custom-form .legal-consent-container ul {
+  margin: 0 !important;
+  padding: 0 !important;
+  list-style: none !important;
+}
+
+.hubspot-custom-form .legal-consent-container ul li {
+  display: flex !important;
+  align-items: flex-start !important;
+}
+
+.hubspot-custom-form .legal-consent-container ul li input {
+  margin: 4px 10px 0 0 !important;
+  flex: 0 0 auto !important;
+}
+
+.hubspot-form-field {
+  margin-bottom: 1rem;
+}
+
+.hubspot-form-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.hs-input {
+  width: 100% !important;
+  padding: 0.75rem 1rem !important;
+  margin-bottom: 10px;
+  border: 1px solid #d1d5db !important;
+  border-radius: 0.375rem !important;
+  font-size: 1rem !important;
+  line-height: 1.5 !important;
+  transition: none !important; /* Prevent animations that might cause size changes */
+  max-width: none !important;
+  box-sizing: border-box !important;
+  height: auto !important; /* Prevent default height */
+}
+
+.hs-input:focus {
+  outline: none !important;
+  border-color: var(--primary) !important;
+  /* Keep same size on focus */
+  padding: 0.75rem 1rem !important;
+  margin: 0 0 10px 0 !important;
+  box-shadow: 0 0 0 2px rgba(255, 79, 0, 0.2) !important;
+}
+
+.hubspot-submit-button {
+  display: inline-block;
+  background-color: var(--primary) !important;
+  color: white !important;
+  font-weight: bold !important;
+  padding: 0.75rem 1.5rem !important;
+  border-radius: 0.375rem !important;
+  border: none !important;
+  cursor: pointer !important;
+  font-size: 1rem !important;
+  line-height: 1.5 !important;
+  text-align: center !important;
+  transition: background-color 0.15s ease-in-out !important;
+  width: 100% !important;
+  margin-top: 1rem !important;
+}
+
+.hubspot-submit-button:hover {
+  background-color: var(--primary-hover) !important;
+}
+
+.hubspot-form-error {
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+/* Fix for HubSpot's default styling */
+.hs-error-msgs {
+  list-style: none !important;
+  padding-left: 0 !important;
+  margin: 0.25rem 0 !important;
+}
+
+.hs-form-required {
+  color: #ef4444;
+}
+
+.hs-form-booleancheckbox-display .hs-input {
+  width: 5% !important;
+}
+
+/* Make the form responsive */
+@media (max-width: 640px) {
+  .hubspot-custom-form {
+    padding: 0.5rem 0;
+  }
+  
+  .hubspot-form-input {
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .hubspot-submit-button {
+    padding: 0.5rem 1rem !important;
   }
 }
 
